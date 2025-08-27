@@ -1,0 +1,34 @@
+name: Deploy to OVH (SFTP)
+on:
+  push:
+    branches: [ main ]   # déploie dès que tu pousses sur la branche main
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # --- SI ton site n'a PAS de build (HTML/PHP/CSS/JS direct), laisse comme ça ---
+      # --- SI tu as un build (Vite/React/Next export), dé-commente le bloc Node ci-dessous
+      # - name: Setup Node
+      #   uses: actions/setup-node@v4
+      #   with:
+      #     node-version: '20'
+      # - name: Install & Build
+      #   run: |
+      #     npm ci
+      #     npm run build
+
+      - name: Upload via SFTP to OVH
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.1
+        with:
+          server: ${{ secrets.OVH_HOST }}
+          username: ${{ secrets.OVH_USER }}
+          password: ${{ secrets.OVH_PASSWORD }}
+          # Si pas de build : on déploie tout le repo (sauf exclusions)
+          # Si build (ex: Vite/Next export) : remplace ./ par le dossier de build (./dist ou ./out)
+          local_path: ./ 
+          remote_path: ${{ secrets.OVH_TARGET_DIR }}
+          sftp_only: true
+          exclude: ".git*,node_modules*,.github*,README*,LICENSE*,*.md,.env*,*.map"
