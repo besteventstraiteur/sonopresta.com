@@ -19,7 +19,7 @@ jobs:
           sudo apt-get install -y lftp
 
       # Déploiement SFTP par mirroring avec mot de passe
-      - name: Mirror ./www -> /www (OVH SFTP)
+      - name: Mirror ./www -> /home/sonoprf/www (OVH SFTP)
         env:
           OVH_HOST: ${{ secrets.OVH_HOST }}       # ftp.cluster100.hosting.ovh.net
           OVH_USER: ${{ secrets.OVH_USER }}       # sonoprf
@@ -35,12 +35,12 @@ jobs:
           # - --only-newer : n'envoie que les fichiers plus récents
           # - --exclude-glob : exclut les patterns
           # - ./www : dossier local à déployer
-          # - /www  : dossier distant OVH (public)
+          # - /home/sonoprf/www : dossier distant OVH (public)
           lftp -u "$OVH_USER","$OVH_PASSWORD" sftp://$OVH_HOST -e "\
             set sftp:auto-confirm yes; \
             set net:max-retries 2; \
             set net:timeout 20; \
-            mirror -R \
+            mirror -R --delete \
               --parallel=4 \
               --only-newer \
               --exclude-glob .git* \
@@ -49,7 +49,7 @@ jobs:
               --exclude-glob *.md \
               --exclude-glob *.map \
               --exclude-glob .env* \
-              ./www /www; \
+              ./www /home/sonoprf/www; \
             bye"
 
       # (Optionnel) Healthcheck simple
