@@ -2,8 +2,8 @@ name: Deploy Sonopresta to OVH (SFTP via lftp)
 
 on:
   push:
-    branches: [ main ]          # déploie à chaque push sur main
-  workflow_dispatch:             # permet un lancement manuel
+    branches: [ main ]          # Déploie à chaque push sur la branche main
+  workflow_dispatch:            # Permet aussi de lancer manuellement
 
 jobs:
   deploy:
@@ -18,42 +18,27 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y lftp
 
-      # Déploiement SFTP par mirroring avec mot de passe
       - name: Mirror ./www -> /home/sonoprf/www (OVH SFTP)
         env:
-          OVH_HOST: ${{ secrets.OVH_HOST }}       # ftp.cluster100.hosting.ovh.net
-          OVH_USER: ${{ secrets.OVH_USER }}       # sonoprf
+          OVH_HOST: ${{ secrets.OVH_HOST }}
+          OVH_USER: ${{ secrets.OVH_USER }}
           OVH_PASSWORD: ${{ secrets.OVH_PASSWORD }}
         run: |
-          # Sécurité: ne pas afficher le mot de passe dans les logs
+          # Ne pas afficher le mot de passe dans les logs
           set +x
-
-          # Commande lftp:
-          # - sftp:auto-confirm yes : accepte l'empreinte du host
-          # - mirror -R : upload (reverse mirror) du local vers le distant
-          # - --parallel=4 : 4 transferts en parallèle (ajuste si besoin)
-          # - --only-newer : n'envoie que les fichiers plus récents
-          # - --exclude-glob : exclut les patterns
-          # - ./www : dossier local à déployer
-          # - /home/sonoprf/www : dossier distant OVH (public)
-          lftp -u "$OVH_USER","$OVH_PASSWORD" sftp://$OVH_HOST -e "\
-            set sftp:auto-confirm yes; \
-            set net:max-retries 2; \
-            set net:timeout 20; \
-            mirror -R \
-              --parallel=4 \
-              --only-newer \
-              --exclude-glob .git* \
-              --exclude-glob .github* \
-              --exclude-glob node_modules* \
-              --exclude-glob *.md \
-              --exclude-glob *.map \
-              --exclude-glob .env* \
-              ./www /home/sonoprf/www; \
-            bye"
-
-      # (Optionnel) Healthcheck simple
-      # - name: Healthcheck homepage
-      #   run: |
-      #     STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://www.sonopresta.com/)
-      #     [ "$STATUS" = "200" ] || (echo "Healthcheck failed: $STATUS" && exit 1)
+          lftp -u "$OVH_USER","$OVH_PASSWORD" sftp://$OVH_HOST <<'EOF'
+          set sftp:auto-confirm yes
+          set net:max-retries 2
+          set net:timeout 20
+          mirror -R \
+            --parallel=4 \
+            --only-newer \
+            --exclude-glob .git* \
+            --exclude-glob .github* \
+            --exclude-glob node_modules* \
+            --exclude-glob '*.md' \
+            --exclude-glob '*.map' \
+            --exclude-glob '.env*' \
+            ./www /home/sonoprf/www
+          bye
+          EOF
