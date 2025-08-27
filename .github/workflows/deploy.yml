@@ -13,22 +13,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Déploiement SFTP avec mot de passe (action fiable)
+      # Déploiement SFTP avec mot de passe
       - name: Deploy to OVH via SFTP
-        uses: SamKirkland/FTP-Deploy-Action@4.3.4
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
-          server: ${{ secrets.OVH_HOST }}
-          username: ${{ secrets.OVH_USER }}
+          server: ${{ secrets.OVH_HOST }}    # ftp.cluster100.hosting.ovh.net
+          username: ${{ secrets.OVH_USER }}  # sonoprf
           password: ${{ secrets.OVH_PASSWORD }}
           protocol: sftp
           port: 22
-          # On envoie UNIQUEMENT le contenu du dossier www de ton repo
-          local-dir: ./www/
-          # Côté OVH, le login te place dans /home/sonoprf
-          # donc le site public est /home/sonoprf/www -> ici on met simplement /www/
-          server-dir: /www/
-          # On ne supprime rien côté serveur (plus safe pour démarrer)
-          dangerous-clean-slate: false
+          local-dir: ./www/                  # on envoie UNIQUEMENT le contenu de ./www
+          server-dir: /www/                  # dossier public OVH (login = /home/sonoprf)
+          dangerous-clean-slate: false       # on ne supprime rien côté serveur
           exclude: |
             **/.git*
             **/.github*
