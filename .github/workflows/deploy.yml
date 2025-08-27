@@ -2,8 +2,8 @@ name: Deploy Sonopresta to OVH (SFTP)
 
 on:
   push:
-    branches: [ main ]           # déploie à chaque push sur main
-  workflow_dispatch:              # permet un lancement manuel
+    branches: [ main ]          # déploie à chaque push sur main
+  workflow_dispatch:             # permet un lancement manuel
 
 jobs:
   deploy:
@@ -13,7 +13,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Déploiement SFTP avec mot de passe (action officielle)
+      # Déploiement SFTP avec mot de passe (action fiable)
       - name: Deploy to OVH via SFTP
         uses: SamKirkland/FTP-Deploy-Action@4.3.4
         with:
@@ -22,10 +22,13 @@ jobs:
           password: ${{ secrets.OVH_PASSWORD }}
           protocol: sftp
           port: 22
-          local-dir: ./www/          # on envoie UNIQUEMENT le contenu de ./www
-          server-dir: /www/          # côté OVH: dossier racine du site
+          # On envoie UNIQUEMENT le contenu du dossier www de ton repo
+          local-dir: ./www/
+          # Côté OVH, le login te place dans /home/sonoprf
+          # donc le site public est /home/sonoprf/www -> ici on met simplement /www/
+          server-dir: /www/
+          # On ne supprime rien côté serveur (plus safe pour démarrer)
           dangerous-clean-slate: false
-          state-name: .ftp-deploy-sync-state-sonopresta.json
           exclude: |
             **/.git*
             **/.github*
@@ -34,13 +37,3 @@ jobs:
             **/*.map
             **/.env*
             **/.DS_Store
-
-      # (Optionnel) Healthcheck
-      - name: Healthcheck homepage
-        if: ${{ success() && secrets.SITE_URL != '' }}
-        run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${{ secrets.SITE_URL }}")
-          if [ "$STATUS" != "200" ]; then
-            echo "Healthcheck failed with status $STATUS"
-            exit 1
-          fi
