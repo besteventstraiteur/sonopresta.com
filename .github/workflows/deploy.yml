@@ -1,4 +1,4 @@
-name: Deploy Sonopresta to OVH (SFTP)
+name: Deploy Sonopresta to OVH (SFTP via lftp)
 
 on:
   push:
@@ -13,23 +13,47 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Déploiement SFTP avec mot de passe
-      - name: Deploy to OVH via SFTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
-        with:
-          server: ${{ secrets.OVH_HOST }}    # ftp.cluster100.hosting.ovh.net
-          username: ${{ secrets.OVH_USER }}  # sonoprf
-          password: ${{ secrets.OVH_PASSWORD }}
-          protocol: sftp
-          port: 22
-          local-dir: ./www/                  # on envoie UNIQUEMENT le contenu de ./www
-          server-dir: /www/                  # dossier public OVH (login = /home/sonoprf)
-          dangerous-clean-slate: false       # on ne supprime rien côté serveur
-          exclude: |
-            **/.git*
-            **/.github*
-            **/node_modules*
-            **/*.md
-            **/*.map
-            **/.env*
-            **/.DS_Store
+      - name: Install lftp
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lftp
+
+      # Déploiement SFTP par mirroring avec mot de passe
+      - name: Mirror ./www -> /www (OVH SFTP)
+        env:
+          OVH_HOST: ${{ secrets.OVH_HOST }}       # ftp.cluster100.hosting.ovh.net
+          OVH_USER: ${{ secrets.OVH_USER }}       # sonoprf
+          OVH_PASSWORD: ${{ secrets.OVH_PASSWORD }}
+        run: |
+          # Sécurité: ne pas afficher le mot de passe dans les logs
+          set +x
+
+          # Commande lftp:
+          # - sftp:auto-confirm yes : accepte l'empreinte du host
+          # - mirror -R : upload (reverse mirror) du local vers le distant
+          # - --parallel=4 : 4 transferts en parallèle (ajuste si besoin)
+          # - --only-newer : n'envoie que les fichiers plus récents
+          # - --exclude-glob : exclut les patterns
+          # - ./www : dossier local à déployer
+          # - /www  : dossier distant OVH (public)
+          lftp -u "$OVH_USER","$OVH_PASSWORD" sftp://$OVH_HOST -e "\
+            set sftp:auto-confirm yes; \
+            set net:max-retries 2; \
+            set net:timeout 20; \
+            mirror -R \
+              --parallel=4 \
+              --only-newer \
+              --exclude-glob .git* \
+              --exclude-glob .github* \
+              --exclude-glob node_modules* \
+              --exclude-glob *.md \
+              --exclude-glob *.map \
+              --exclude-glob .env* \
+              ./www /www; \
+            bye"
+
+      # (Optionnel) Healthcheck simple
+      # - name: Healthcheck homepage
+      #   run: |
+      #     STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://www.sonopresta.com/)
+      #     [ "$STATUS" = "200" ] || (echo "Healthcheck failed: $STATUS" && exit 1)
