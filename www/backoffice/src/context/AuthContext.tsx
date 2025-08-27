@@ -12,7 +12,7 @@ export interface CurrentUser {
 interface AuthContextProps {
   user: CurrentUser | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<CurrentUser>;
   logout: () => Promise<void>;
 }
 
@@ -53,7 +53,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
     const role = (data.user?.user_metadata?.role as UserRole) || 'customer';
-    setUser({ id: data.user!.id, email: data.user!.email!, role });
+    const currentUser: CurrentUser = { id: data.user!.id, email: data.user!.email!, role };
+    setUser(currentUser);
+    return currentUser;
   };
 
   const logout = async () => {

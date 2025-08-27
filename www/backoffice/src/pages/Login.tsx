@@ -1,16 +1,25 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login, user } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (user) {
+      navigate(user.role === 'admin' ? '/admin' : '/mon-compte');
+    }
+  }, [user, navigate]);
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
-      await login(email, password);
+      const logged = await login(email, password);
+      navigate(logged.role === 'admin' ? '/admin' : '/mon-compte');
     } catch (err: any) {
       setError(err.message);
     }
