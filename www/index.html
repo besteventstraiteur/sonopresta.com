@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
   <title>SonoPresta</title>
 
-  <!-- Valeurs par défaut pour éviter tout flash et garantir un thème même si l'API tombe -->
+  <!-- Valeurs par défaut pour éviter tout flash et garantir un thème même si l’API tombe -->
   <style>
     :root {
       --primary: #111111;
@@ -17,14 +17,14 @@
     html, body { margin: 0; padding: 0; }
   </style>
 
-  <!-- (Optionnel) Feuille de style générée par Vite : mets ici le bon hash si tu en as un -->
-  <!-- <link rel="stylesheet" href="/assets/index-REPLACE_WITH_CSS_HASH.css" crossorigin> -->
+  <!-- CSS générée (garde le même hash que dans /www/assets) -->
+  <link rel="stylesheet" href="assets/index-c6cvGjm2.css" crossorigin>
 </head>
 <body>
   <div id="root"></div>
   <noscript>Veuillez activer JavaScript pour afficher ce site.</noscript>
 
-  <!-- BOOTSTRAP SÛR : 1 seul bloc. Pas de monkey-patch de fetch. Pas de doublon d’handlers. -->
+  <!-- Bootstrap sûr : 1 seul bloc, sans patcher fetch -->
   <script id="bootstrap">
     (function () {
       function showFatalFallback() {
@@ -56,6 +56,7 @@
           return {}; // jamais d’exception vers l’UI
         }
       }
+
       function normalizeCustomizer(raw) {
         const d = { primary:'#111111', secondary:'#ffffff', accent:'#06b6d4', borderRadius:'12px', logo:null };
         const r = (raw && typeof raw === 'object') ? raw : {};
@@ -76,7 +77,7 @@
 
       (async function boot() {
         // Tente de charger le customizer ; n'échoue jamais côté UI
-        const raw = await getJSON('/backend/public/api/option/customizer');
+        const raw = await getJSON('backend/public/api/option/customizer');
         const theme = normalizeCustomizer(raw?.data ?? raw);
 
         // Applique les variables CSS globales
@@ -86,17 +87,13 @@
         root.style.setProperty('--accent', theme.accent);
         root.style.setProperty('--radius', theme.borderRadius);
 
-        // Expose si besoin par le bundle
+        // Expose pour le bundle si besoin
         window.__THEME__ = theme;
       })();
     })();
   </script>
 
-  <!-- ⚠️ IMPORTANT : ne garde QU’UNE SEULE inclusion du bundle -->
-  <!-- Si le nom de fichier diffère, mets celui présent dans /assets -->
-  <script type="module" src="/assets/index-BkUmda.js" crossorigin></script>
-
-  <!-- (Optionnel) Tes autres scripts "non dupliqués" (ex: Google Translate) peuvent rester ici,
-       mais supprime toute seconde copie et tout patch custom de fetch. -->
+  <!-- IMPORTANT : une seule inclusion du bundle (hash existant dans /www/assets) -->
+  <script type="module" src="assets/index-BkIUmdma.js" crossorigin></script>
 </body>
 </html>
