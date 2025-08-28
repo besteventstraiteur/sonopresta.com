@@ -18,12 +18,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y lftp
 
+      # Déploiement SFTP par mirroring avec mot de passe
       - name: Mirror ./www -> /home/sonoprf/www (OVH SFTP)
         env:
           OVH_HOST: ${{ secrets.OVH_HOST }}
           OVH_USER: ${{ secrets.OVH_USER }}
           OVH_PASSWORD: ${{ secrets.OVH_PASSWORD }}
         run: |
+          set -e
           # ne pas afficher le mot de passe dans les logs
           set +x
           lftp -u "$OVH_USER","$OVH_PASSWORD" sftp://$OVH_HOST <<'EOF'
@@ -33,12 +35,18 @@ jobs:
           mirror -R \
             --parallel=4 \
             --only-newer \
-            --exclude-glob .git* \
-            --exclude-glob .github* \
-            --exclude-glob node_modules* \
+            --exclude-glob '.git*' \
+            --exclude-glob '.github*' \
+            --exclude-glob 'node_modules*' \
             --exclude-glob '*.md' \
             --exclude-glob '*.map' \
             --exclude-glob '.env*' \
             ./www /home/sonoprf/www
           bye
           EOF
+
+      # (Optionnel) Healthcheck
+      # - name: Healthcheck homepage
+      #   run: |
+      #     STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://www.sonopresta.com/)
+      #     [ "$STATUS" = "200" ] || (echo "Healthcheck failed: $STATUS" && exit 1)
