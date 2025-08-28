@@ -59,3 +59,8 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## OTP configuration
+
+To skip SMS code verification during development, set `DISABLE_OTP=true` in your `.env` file. When this flag is enabled the API
+authenticates users immediately without sending a one-time password.
