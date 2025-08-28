@@ -99,6 +99,7 @@ Route::controller(CouponController::class)->group(function() {
 // blogs routes
 Route::controller(BlogController::class)->group(function() {
     Route::post('blogs', 'list');
+    Route::get('blogs', 'list');
     Route::prefix('blog')->group(function() {
         Route::post('create', 'create');
         Route::post('update', 'update');
@@ -110,6 +111,7 @@ Route::controller(BlogController::class)->group(function() {
 // brochures routes
 Route::controller(BrochureController::class)->group(function() {
     Route::post('brochures', 'list');
+    Route::get('brochures', 'list');
     Route::prefix('brochure')->group(function() {
         Route::post('create', 'create');
         Route::post('delete', 'delete');
@@ -133,12 +135,15 @@ Route::controller(TicketController::class)->group(function() {
 Route::controller(OptionController::class)->group(function() {
     Route::post('option/create', 'create')->middleware('auth:sanctum');
     Route::post('option/{key}', 'getOption');
+    Route::get('option/customizer', 'customizer');
 });
 
 // additional routes
 Route::controller(AdditionalController::class)->group(function() {
     Route::get('crons', 'generalCron');
 });
+
+Route::get('health', fn() => response()->json(['ok' => true]));
 
 
 Route::get('/uploads/{path}', function ($path) {

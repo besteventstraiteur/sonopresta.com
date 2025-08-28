@@ -1,52 +1,33 @@
-# ========= OVH / SonoPresta .htaccess =========
+########################################
+# OVH / Apache - SPA + assets
+########################################
 
-# 0) Empêcher l’indexation des répertoires
-Options -Indexes
+Options -Multiviews
+
+# Types MIME explicites
+<IfModule mod_mime.c>
+  AddType application/javascript .js
+  AddType text/css .css
+  AddType image/svg+xml .svg
+  AddType application/json .json
+</IfModule>
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
-  # 1) Canonical host : forcer le domaine sans www
-  RewriteCond %{HTTP_HOST} ^www\.sonopresta\.com$ [NC]
-  RewriteRule ^ https://sonopresta.com%{REQUEST_URI} [R=301,L]
-
-  # 2) Rediriger le host du cluster OVH vers ton domaine
-  RewriteCond %{HTTP_HOST} ^sonoprf\.cluster100\.hosting\.ovh\.net$ [NC]
-  RewriteRule ^ https://sonopresta.com%{REQUEST_URI} [R=301,L]
-
-  # 3) Forcer HTTPS si on tombe encore en HTTP
-  RewriteCond %{HTTPS} !=on
-  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
-
-  # 4) Laisser passer les fichiers/dossiers qui existent
-  RewriteCond %{REQUEST_FILENAME} -f [OR]
-  RewriteCond %{REQUEST_FILENAME} -d
+  # 1) Court-circuiter toute réécriture pour les assets et fichiers statiques
+  RewriteCond %{REQUEST_URI} ^/assets/ [OR]
+  RewriteCond %{REQUEST_URI} ^/browser- [OR]
+  RewriteCond %{REQUEST_URI} \.(js|css|png|jpg|jpeg|gif|svg|webp|ico|woff|woff2|ttf|map)$ [NC]
+  RewriteCond %{REQUEST_FILENAME} -f
   RewriteRule ^ - [L]
 
-  # 5) Fallback SPA : tout le reste → index.html
+  # 2) Fallback SPA : renvoyer index.html uniquement si ce n’est NI un fichier NI un dossier
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
   RewriteRule ^ index.html [L]
 </IfModule>
 
-<IfModule mod_headers.c>
-  # 6) Sécurité & “upgrade” auto des URLs http -> https
-  Header always set Content-Security-Policy "upgrade-insecure-requests"
-  Header always set X-Content-Type-Options "nosniff"
-  Header always set X-Frame-Options "SAMEORIGIN"
-  Header always set Referrer-Policy "strict-origin-when-cross-origin"
-
-  # (Active HSTS seulement si TOUS les sous-domaines sont en HTTPS)
-  # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
-</IfModule>
-
-# 7) Cache simple (tu peux ajuster)
-FileETag None
-<IfModule mod_expires.c>
-  ExpiresActive On
-  ExpiresDefault "access plus 1 hour"
-  ExpiresByType text/html "access plus 1 minute"
-  ExpiresByType text/css "access plus 7 days"
-  ExpiresByType application/javascript "access plus 7 days"
-  ExpiresByType image/* "access plus 30 days"
-  ExpiresByType font/*  "access plus 30 days"
-</IfModule>
-# ==============================================
+########################################
+# Fin
+########################################
