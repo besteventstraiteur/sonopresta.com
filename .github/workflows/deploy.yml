@@ -1,9 +1,9 @@
-name: Deploy Sonopresta to OVH (SFTP via lftp)
+name: Deploy sonopresta to OVH (SFTP via lftp)
 
 on:
   push:
-    branches: [ main ]          # Déploie à chaque push sur la branche main
-  workflow_dispatch:            # Permet aussi de lancer manuellement
+    branches: [ main ]   # Déploie à chaque push sur main
+  workflow_dispatch:      # Permet aussi de lancer manuellement
 
 jobs:
   deploy:
@@ -18,27 +18,32 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y lftp
 
-      - name: Mirror ./www -> /home/sonoprf/www (OVH SFTP)
+      - name: Deploy (mirror ./www -> OVH)
         env:
           OVH_HOST: ${{ secrets.OVH_HOST }}
           OVH_USER: ${{ secrets.OVH_USER }}
           OVH_PASSWORD: ${{ secrets.OVH_PASSWORD }}
         run: |
-          # Ne pas afficher le mot de passe dans les logs
-          set +x
+          set -e
           lftp -u "$OVH_USER","$OVH_PASSWORD" sftp://$OVH_HOST <<'EOF'
           set sftp:auto-confirm yes
           set net:max-retries 2
           set net:timeout 20
-          mirror -R \
+          mirror -R --delete \
             --parallel=4 \
             --only-newer \
-            --exclude-glob .git* \
-            --exclude-glob .github* \
-            --exclude-glob node_modules* \
+            --exclude-glob '.git*' \
+            --exclude-glob '.github*' \
+            --exclude-glob 'node_modules*' \
             --exclude-glob '*.md' \
             --exclude-glob '*.map' \
             --exclude-glob '.env*' \
-            ./www /home/sonoprf/www
+            ./www/ /home/sonoprf/www/
           bye
           EOF
+
+      # Optionnel : mini healthcheck (décommente si utile)
+      # - name: Healthcheck homepage
+      #   run: |
+      #     STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://www.sonopresta.com/)
+      #     [ "$STATUS" = "200" ] || (echo "Healthcheck failed: $STATUS" && exit 1)
