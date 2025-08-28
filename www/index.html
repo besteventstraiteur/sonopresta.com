@@ -48,17 +48,33 @@
       mo.observe(document.documentElement, { childList: true, subtree: true });
 
       // fetch
-      const _fetch = window.fetch;
-      window.fetch = function (input, init) {
-        try {
+        const _fetch = window.fetch;
+        window.fetch = async function (input, init = {}) {
           let url = typeof input === "string" ? input : input.url;
           const fixed = fixUrl(url);
           if (fixed && fixed !== url) {
             input = (typeof input === "string") ? fixed : new Request(fixed, input);
+            url = fixed;
           }
-        } catch (e) {}
-        return _fetch.call(this, input, init);
-      };
+          if (/\/backend\/public\/api\/(option\/customizer|brochures|blogs)/.test(url)) {
+            init.method = 'GET';
+            delete init.body;
+          }
+          try {
+            const resp = await _fetch.call(this, input, init);
+            if (!resp.ok && /\/backend\/public\/api\/(option\/customizer|brochures|blogs)/.test(url)) {
+              console.warn('API error', url, resp.status);
+              return new Response('[]', {status:200, headers:{'Content-Type':'application/json'}});
+            }
+            return resp;
+          } catch (err) {
+            if (/\/backend\/public\/api\/(option\/customizer|brochures|blogs)/.test(url)) {
+              console.warn('API network error', url, err);
+              return new Response('[]', {status:200, headers:{'Content-Type':'application/json'}});
+            }
+            throw err;
+          }
+        };
 
       // XHR
       const _open = XMLHttpRequest.prototype.open;
@@ -78,7 +94,14 @@
 
 <body>
   <div id="root"></div>
-
+  <script>
+    window.addEventListener('error', () => {
+      const el = document.getElementById('root');
+      if (el) {
+        el.innerHTML = '<p>Une erreur est survenue. Merci de recharger la page.</p><button onclick="location.reload()">Réessayer</button>';
+      }
+    });
+  </script>
   <script type="module" src="/assets/index-BklUmdma.js" crossorigin></script>
 
   <script>
