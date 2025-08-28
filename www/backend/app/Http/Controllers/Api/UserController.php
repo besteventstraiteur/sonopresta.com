@@ -105,7 +105,20 @@ class UserController extends BaseController
             'password' => $request->password
         );
 
-        if(!request('code')){
+        if(config('app.disable_otp')){
+            $auth = Auth::attempt($arr);
+            if($auth){
+                $user = Auth::user();
+                $fcm_token = $request->fcm_token ?? $user->fcm_token;
+                $user->update(['fcm_token' => $fcm_token]);
+                $token = $user->createToken('MyAppToken');
+                $user['token'] = $token->plainTextToken;
+                $success['user'] = $user;
+                return $this->sendResponse('Connexion réussie', $success);
+            }else{
+                return $this->sendError('Identifiants invalides', ['error' => 'Unauthorised', 'email' => $request->email, 'response_type' => 2]);
+            }
+        }elseif(!request('code')){
             if(!Auth::validate($arr)){
                 return $this->sendError('Identifiants invalides', ['error' => 'Unauthorised', 'email' => $request->email, 'response_type' => 2]);
             }else{
