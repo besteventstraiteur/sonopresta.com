@@ -48,17 +48,40 @@
       mo.observe(document.documentElement, { childList: true, subtree: true });
 
       // fetch
-      const _fetch = window.fetch;
-      window.fetch = function (input, init) {
-        try {
+        const DEFAULT_CUSTOMIZER = {data:{primary:'#111111',secondary:'#ffffff',accent:'#06b6d4',borderRadius:'12px',logo:null}};
+        const _fetch = window.fetch;
+        window.fetch = async function (input, init = {}) {
           let url = typeof input === "string" ? input : input.url;
           const fixed = fixUrl(url);
           if (fixed && fixed !== url) {
             input = (typeof input === "string") ? fixed : new Request(fixed, input);
+            url = fixed;
           }
-        } catch (e) {}
-        return _fetch.call(this, input, init);
-      };
+          if (/\/backend\/public\/api\/(option\/customizer|brochures|blogs)/.test(url)) {
+            init.method = 'GET';
+            delete init.body;
+          }
+          try {
+            const resp = await _fetch.call(this, input, init);
+            if (!resp.ok && /\/backend\/public\/api\/(option\/customizer|brochures|blogs)/.test(url)) {
+              console.warn('API error', url, resp.status);
+              if (/option\/customizer/.test(url)) {
+                return new Response(JSON.stringify(DEFAULT_CUSTOMIZER), {status:200, headers:{'Content-Type':'application/json'}});
+              }
+              return new Response('[]', {status:200, headers:{'Content-Type':'application/json'}});
+            }
+            return resp;
+          } catch (err) {
+            if (/\/backend\/public\/api\/(option\/customizer|brochures|blogs)/.test(url)) {
+              console.warn('API network error', url, err);
+              if (/option\/customizer/.test(url)) {
+                return new Response(JSON.stringify(DEFAULT_CUSTOMIZER), {status:200, headers:{'Content-Type':'application/json'}});
+              }
+              return new Response('[]', {status:200, headers:{'Content-Type':'application/json'}});
+            }
+            throw err;
+          }
+        };
 
       // XHR
       const _open = XMLHttpRequest.prototype.open;
@@ -78,8 +101,42 @@
 
 <body>
   <div id="root"></div>
+  <script type="module">
+    import { API } from '/assets/js/apiClient.js';
+    import { normalizeCustomizer, defaultTheme } from '/assets/js/theme.js';
 
-  <script type="module" src="/assets/index-BklUmdma.js" crossorigin></script>
+    function showFatalFallback() {
+      if (document.getElementById('fatal-fallback')) return;
+      const el = document.createElement('div');
+      el.id = 'fatal-fallback';
+      el.style.cssText = 'position:fixed;inset:0;padding:24px;display:flex;align-items:center;justify-content:center;font-family:system-ui,Segoe UI,Roboto,Arial;background:#0b0b0b;color:#fff;z-index:999999;';
+      el.innerHTML = '<div style="max-width:620px;text-align:center;line-height:1.4;"><h1 style="font-size:22px;margin:0 0 8px;">Un souci technique empêche l\u2019affichage complet</h1><p style="opacity:.8;margin:0 0 16px;">Réessaye dans un instant. Le contenu reste accessible dès que l\u2019API répond.</p><button style="padding:10px 16px;border-radius:10px;border:0;cursor:pointer;">Recharger</button></div>';
+      el.querySelector('button').onclick = () => location.reload();
+      document.body.appendChild(el);
+    }
+
+    window.addEventListener('error', showFatalFallback);
+    window.addEventListener('unhandledrejection', showFatalFallback);
+
+    async function boot() {
+      const customizer = await API.getCustomizer();
+      const theme = normalizeCustomizer(customizer?.data ?? customizer);
+      const root = document.documentElement;
+      root.style.setProperty('--primary', theme.primary);
+      root.style.setProperty('--secondary', theme.secondary);
+      root.style.setProperty('--accent', theme.accent);
+      root.style.setProperty('--radius', theme.borderRadius);
+      window.__THEME__ = theme;
+      try {
+        await import('/assets/index-BklUmdma.js');
+      } catch (e) {
+        console.error('Boot failed', e);
+        showFatalFallback();
+      }
+    }
+
+    boot();
+  </script>
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
