@@ -54,6 +54,8 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
+    'disable_otp' => env('DISABLE_OTP', false),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone
