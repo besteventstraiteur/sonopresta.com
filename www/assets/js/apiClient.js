@@ -1,6 +1,8 @@
+const API_BASE = 'https://sonopresta.com/backend/public/api';
+
 export async function getJSON(path) {
   try {
-    const res = await fetch(path, {
+    const res = await fetch(`${API_BASE}${path}`, {
       method: 'GET',
       headers: { 'Accept': 'application/json' }
     });
@@ -16,8 +18,14 @@ export async function getJSON(path) {
   }
 }
 
+function ensureArray(data) {
+  if (Array.isArray(data?.data)) return data.data;
+  if (Array.isArray(data)) return data;
+  return [];
+}
+
 export const API = {
-  getCustomizer: () => getJSON('/backend/public/api/option/customizer'),
-  getBlogs:      () => getJSON('/backend/public/api/blogs'),
-  getBrochures:  () => getJSON('/backend/public/api/brochures'),
+  getCustomizer: () => getJSON('/option/customizer'),
+  getBlogs:      () => getJSON('/blogs').then(ensureArray),
+  getBrochures:  () => getJSON('/brochures').then(ensureArray),
 };

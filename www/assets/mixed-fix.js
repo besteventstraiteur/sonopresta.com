@@ -5,8 +5,8 @@
       if (typeof u !== "string") return u;
       if (/^(data:|blob:|mailto:|tel:|javascript:)/i.test(u)) return u;
       u = u.replace(
-        /^http:\/\/sonoprf\.cluster100\.hosting\.ovh\.net/i,
-        "https://sonoprf.cluster100.hosting.ovh.net"
+        /^http:\/\/sonoprf\.sonopresta\.hosting\.ovh\.net/i,
+        "https://sonopresta.com"
       );
       u = u.replace(/^http:\/\/sonopresta\.com/i, "https://sonopresta.com");
       return u;
