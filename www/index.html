@@ -1,108 +1,78 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sono Presta</title>
-  <link rel="icon" href="/lovable-uploads/favicon.png" type="image/png" />
-  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
-  <link rel="stylesheet" href="assets/index-C6vqGjm2.css" crossorigin>
-</head>
-<body>
-  <div id="root"></div>
-  <script type="module">
-      import { API } from './assets/js/apiClient.js';
-      import { normalizeCustomizer, defaultTheme } from './assets/js/theme.js';
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sono Presta</title>
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="stylesheet" href="assets/index-C6vqGjrn2.css" crossorigin />
+  </head>
+  <body>
+    <div id="root"></div>
 
-    function showFatalFallback() {
-      if (document.getElementById('fatal-fallback')) return;
-      const el = document.createElement('div');
-      el.id = 'fatal-fallback';
-      el.style.cssText = 'position:fixed;inset:0;padding:24px;display:flex;align-items:center;justify-content:center;font-family:system-ui,Segoe UI,Roboto,Arial;background:#0b0b0b;color:#fff;z-index:999999;';
-      el.innerHTML = '<div style="max-width:620px;text-align:center;line-height:1.4;'><h1 style="font-size:22px;margin:0 0 8px;">Un souci technique empêche l\u2019affichage complet</h1><p style="opacity:.8;margin:0 0 16px;">Réessaye dans un instant. Le contenu reste accessible dès que l\u2019API répond.</p><button style="padding:10px 16px;border-radius:10px;border:0;cursor:pointer;">Recharger</button></div>';
-      el.querySelector('button').onclick = () => location.reload();
-      document.body.appendChild(el);
-    }
+    <!-- Import JS en chemin relatif correct -->
+    <script type="module">
+      import { API } from "./assets/js/apiClient.js";
+      import { normalizeCustomizer, defaultTheme } from "./assets/js/theme.js";
 
-    window.addEventListener('error', showFatalFallback);
-    window.addEventListener('unhandledrejection', showFatalFallback);
+      async function boot() {
+        const customizer = await API.getCustomizer();
+        const theme = normalizeCustomizer(customizer?.data ?? {});
+        applyTheme(theme);
+      }
 
-    const root = document.documentElement;
-    function applyTheme(theme) {
-      root.style.setProperty('--primary', theme.primary);
-      root.style.setProperty('--secondary', theme.secondary);
-      root.style.setProperty('--accent', theme.accent);
-      root.style.setProperty('--radius', theme.borderRadius);
-      window.__THEME__ = theme;
-    }
+      function applyTheme(theme) {
+        if (!theme) return;
+        const root = document.documentElement;
+        root.style.setProperty("--primary", theme.primary);
+        root.style.setProperty("--secondary", theme.secondary);
+        root.style.setProperty("--background", theme.background);
+        root.style.setProperty("--text", theme.text);
+        root.style.setProperty("--border-radius", theme.borderRadius);
+        window.__THEME__ = theme;
+      }
 
-    applyTheme(defaultTheme);
+      function showFatalFallback() {
+        const el = document.createElement("div");
+        el.style.cssText =
+          "position:fixed;top:40%;left:0;right:0;text-align:center;font-size:22px;margin:0 8px;color:#fff;background:#000;padding:20px;z-index:9999";
+        el.innerHTML =
+          "<h1>Un souci technique empêche l’affichage complet 😢</h1><p>Réessayez dans un instant. Le contenu reste accessible.</p>";
+        document.body.appendChild(el);
+      }
 
-    async function boot() {
-      const customizer = await API.getCustomizer();
-      const theme = normalizeCustomizer(customizer?.data ?? customizer);
-      applyTheme(theme);
-    }
-
-    boot().catch(e => {
-      console.error('Boot failed', e);
-      showFatalFallback();
-    });
-  </script>
-
-  <script type="module" src="assets/index-BklUmdma.js" crossorigin></script>
-
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const f = document.createElement("iframe");
-      f.src = "https://www.applimova.ai/embededChatbot?id=685fbca476d3455e5de48275";
-      const small = innerWidth < 768;
-      const w = small ? "90%" : "420px";
-      const h = small ? "calc(100vh - 100px)" : "600px";
-      Object.assign(f.style, {
-        position: "fixed",
-        bottom: "0",
-        right: small ? "5%" : "30px",
-        border: "none",
-        zIndex: "1000",
-        width: w,
-        height: h,
-        borderRadius: "10px"
+      boot().catch((e) => {
+        console.error("Boot failed", e);
+        showFatalFallback();
       });
-      document.body.appendChild(f);
-      window.addEventListener("message", ev => {
-        const d = ev.data;
-        if (d && typeof d === "object") {
-          if (d.chatbotOpen === true)  { f.style.width = w;  f.style.height = h; }
-          if (d.chatbotOpen === false) { f.style.width = "50px"; f.style.height = "70px"; }
-        }
-      });
-    });
-  </script>
+    </script>
 
-  <div id="google_translate_element"></div>
-  <script>
-    function googleTranslateElementInit() {
-      new google.translate.TranslateElement(
-        {pageLanguage: "fr", includedLanguages: "fr,en",
-         layout: google.translate.TranslateElement.InlineLayout.SIMPLE},
-        "google_translate_element",
-      );
-    }
-  </script>
-  <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <!-- Script bundle généré par Vite -->
+    <script type="module" src="assets/index-BkIUmdma.js" crossorigin></script>
 
-  <style>
-    #google_translate_element { position: fixed; top: 18px; right: 18px; z-index: 9999; }
-    .goog-logo-link, .goog-te-gadget span { display: none !important; }
-    .goog-te-gadget{ font-size:0 !important; }
-    .goog-te-combo{ font-size:16px!important; padding:12px 20px; width:200px!important;
-      border:1px solid #ccc; border-radius:8px; background:#fff; color:#000; outline:none;
-      appearance:none; background-image:url("data:image/svg+xml,%3Csvg fill='gray' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-      background-repeat:no-repeat; background-position:right 15px center; background-size:16px;
-      box-shadow:0 4px 8px rgba(0,0,0,.15); }
-    .goog-te-gadget-simple{ padding:7px; white-space:nowrap; border-radius:8px; box-shadow:0 0 10px #e5e5e5; }
-    iframe.goog-te-banner-frame{ display:none !important; }
-  </style>
-</body>
+    <!-- Google Translate (optionnel) -->
+    <div id="google_translate_element"></div>
+    <script>
+      function googleTranslateElementInit() {
+        new google.translate.TranslateElement(
+          { pageLanguage: "fr", includedLanguages: "fr,en", layout: google.translate.TranslateElement.InlineLayout.SIMPLE },
+          "google_translate_element"
+        );
+      }
+    </script>
+    <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+    <style>
+      #google_translate_element {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        z-index: 9999;
+      }
+      .goog-logo-link,
+      .goog-te-gadget span {
+        display: none !important;
+      }
+    </style>
+  </body>
 </html>

@@ -1,29 +1,27 @@
-########################################
-# OVH / Apache config - SPA + assets
-########################################
+##############################################
+# OVH / Apache Config - SPA + assets
+##############################################
 
 Options -Multiviews
 
-<IfModule mod_mime.c>
-  AddType application/javascript .js
-  AddType text/css .css
-  AddType image/svg+xml .svg
-  AddType application/json .json
-</IfModule>
+# Types MIME explicites
+AddType application/javascript .js
+AddType text/css .css
+AddType image/svg+xml .svg
+AddType application/json .json
 
-<IfModule mod_rewrite.c>
-  RewriteEngine On
+# Redirection et réécriture
+RewriteEngine On
 
-  # Serve existing files and directories directly
-  RewriteCond %{REQUEST_FILENAME} -f
-  RewriteRule ^ - [L]
-  RewriteCond %{REQUEST_FILENAME} -d
-  RewriteRule ^ - [L]
+# Servir les fichiers et dossiers existants directement
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
 
-  # SPA fallback
-  RewriteRule ^ index.html [L]
-</IfModule>
+# Fallback SPA : renvoyer index.html pour tout le reste
+RewriteRule . /index.html [L]
 
-########################################
+##############################################
 # Fin .htaccess
-########################################
+##############################################
