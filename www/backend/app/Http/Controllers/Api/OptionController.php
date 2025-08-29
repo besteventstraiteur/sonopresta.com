@@ -32,6 +32,11 @@ class OptionController extends BaseController
         return Option::where('meta_key', $key)->pluck('meta_value')->first();
     }
 
+    public function customizer()
+    {
+        return Option::where('meta_key', 'customizer')->pluck('meta_value')->first();
+    }
+
     public function create(Request $request)
     {
         $input = $request->all();
