@@ -19,7 +19,7 @@
       const el = document.createElement('div');
       el.id = 'fatal-fallback';
       el.style.cssText = 'position:fixed;inset:0;padding:24px;display:flex;align-items:center;justify-content:center;font-family:system-ui,Segoe UI,Roboto,Arial;background:#0b0b0b;color:#fff;z-index:999999;';
-      el.innerHTML = '<div style="max-width:620px;text-align:center;line-height:1.4;'><h1 style="font-size:22px;margin:0 0 8px;">Un souci technique empêche l\u2019affichage complet</h1><p style="opacity:.8;margin:0 0 16px;">Réessaye dans un instant. Le contenu reste accessible dès que l\u2019API répond.</p><button style="padding:10px 16px;border-radius:10px;border:0;cursor:pointer;">Recharger</button></div>';
+      el.innerHTML = '<div style="max-width:620px;text-align:center;line-height:1.4;"><h1 style="font-size:22px;margin:0 0 8px;">Un souci technique empêche l’affichage complet</h1><p style="opacity:.8;margin:0 0 16px;">Réessaye dans un instant. Le contenu reste accessible dès que l’API répond.</p><button style="padding:10px 16px;border-radius:10px;border:0;cursor:pointer;">Recharger</button></div>';
       el.querySelector('button').onclick = () => location.reload();
       document.body.appendChild(el);
     }
