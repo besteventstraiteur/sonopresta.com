@@ -35,22 +35,22 @@ jobs:
           OVH_PASSWORD: ${{ secrets.OVH_PASSWORD }}
         run: |
           set -e
-          lftp -u "$OVH_USER","$OVH_PASSWORD" sftp://$OVH_HOST <<'EOF'
-set sftp:auto-confirm yes
-set net:max-retries 2
-set net:timeout 20
-mirror -R \
-  --parallel=4 \
-  --only-newer \
-  --delete \
-  --exclude-glob '.git*' \
-  --exclude-glob '.github*' \
-  --exclude-glob 'node_modules*' \
-  --exclude-glob '*.map' \
-  --exclude-glob '.env*' \
-  dist /home/${OVH_USER}/www
-bye
-EOF
+          lftp -u "$OVH_USER","$OVH_PASSWORD" sftp://$OVH_HOST -e "
+            set sftp:auto-confirm yes
+            set net:max-retries 2
+            set net:timeout 20
+            mirror -R \
+              --parallel=4 \
+              --only-newer \
+              --delete \
+              --exclude-glob '.git*' \
+              --exclude-glob '.github*' \
+              --exclude-glob 'node_modules*' \
+              --exclude-glob '*.map' \
+              --exclude-glob '.env*' \
+              dist /home/$OVH_USER/www
+            bye
+          "
 
       - name: Healthcheck
         run: |
