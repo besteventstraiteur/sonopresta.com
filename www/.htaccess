@@ -1,34 +1,27 @@
-########################################
-# OVH / Apache config - SPA + assets
-########################################
+##############################################
+# OVH / Apache Config - SPA + assets
+##############################################
 
 Options -Multiviews
 
 # Types MIME explicites
-<IfModule mod_mime.c>
-  AddType application/javascript .js
-  AddType text/css .css
-  AddType image/svg+xml .svg
-  AddType application/json .json
-</IfModule>
+AddType application/javascript .js
+AddType text/css .css
+AddType image/svg+xml .svg
+AddType application/json .json
 
-# Réécriture
-<IfModule mod_rewrite.c>
-  RewriteEngine On
+# Redirection et réécriture
+RewriteEngine On
 
-  # 1) Servir les fichiers statiques tels quels
-  RewriteCond %{REQUEST_URI} ^/assets/ [OR]
-  RewriteCond %{REQUEST_URI} ^/browser- [OR]
-  RewriteCond %{REQUEST_URI} \.(js|css|png|jpg|jpeg|gif|svg|webp|ico|woff|woff2|ttf|map)$ [NC]
-  RewriteCond %{REQUEST_FILENAME} -f
-  RewriteRule ^ - [L]
+# Servir les fichiers et dossiers existants directement
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
 
-  # 2) Fallback SPA uniquement si ce n’est pas un fichier/dossier réel
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteRule ^ index.html [L]
-</IfModule>
+# Fallback SPA : renvoyer index.html pour tout le reste
+RewriteRule . /index.html [L]
 
-########################################
+##############################################
 # Fin .htaccess
-########################################
+##############################################
