@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sono Presta</title>
+    <link rel="icon" type="image/png" href="/favicon.ico" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <div id="google_translate_element"></div>
+    <script type="module" src="/src/main.jsx"></script>
+    <script>
+      function googleTranslateElementInit() {
+        new google.translate.TranslateElement(
+          { pageLanguage: 'fr', includedLanguages: 'fr,en', layout: google.translate.TranslateElement.InlineLayout.SIMPLE },
+          'google_translate_element'
+        );
+      }
+    </script>
+    <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <style>
+      #google_translate_element {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        z-index: 9999;
+      }
+      .goog-logo-link,
+      .goog-te-gadget span {
+        display: none !important;
+      }
+    </style>
+  </body>
+</html>

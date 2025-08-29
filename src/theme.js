@@ -7,7 +7,7 @@ export const defaultTheme = {
 };
 
 function asString(v, fallback = '') {
-  return (typeof v === 'string' && v.trim().length) ? v.trim() : fallback;
+  return typeof v === 'string' && v.trim().length ? v.trim() : fallback;
 }
 
 function asRadius(v) {
@@ -17,7 +17,7 @@ function asRadius(v) {
 }
 
 export function normalizeCustomizer(raw) {
-  const r = (raw && typeof raw === 'object') ? raw : {};
+  const r = raw && typeof raw === 'object' ? raw : {};
   return {
     primary: asString(r.primary, defaultTheme.primary),
     secondary: asString(r.secondary, defaultTheme.secondary),
