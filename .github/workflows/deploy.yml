@@ -2,31 +2,39 @@ name: Deploy Sonopresta to OVH (SFTP via lftp)
 
 on:
   push:
-    branches: [ main ]          # Déploie à chaque push sur main
-  workflow_dispatch:            # Permet aussi de lancer manuellement
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
 
       - name: Install lftp
         run: |
           sudo apt-get update
           sudo apt-get install -y lftp
 
-      # Déploiement SFTP par mirroring avec mot de passe
-      - name: Mirror ./www -> /home/sonoprf/www (OVH SFTP)
+      - name: Mirror dist -> OVH
         env:
           OVH_HOST: ${{ secrets.OVH_HOST }}
           OVH_USER: ${{ secrets.OVH_USER }}
           OVH_PASSWORD: ${{ secrets.OVH_PASSWORD }}
         run: |
           set -e
-          # ne pas afficher le mot de passe dans les logs
           set +x
           lftp -u "$OVH_USER","$OVH_PASSWORD" sftp://$OVH_HOST <<'EOF'
           set sftp:auto-confirm yes
@@ -35,19 +43,18 @@ jobs:
           mirror -R \
             --parallel=4 \
             --only-newer \
+            --delete \
             --exclude-glob '.git*' \
             --exclude-glob '.github*' \
             --exclude-glob 'node_modules*' \
-            --exclude-glob '*.md' \
             --exclude-glob '*.map' \
             --exclude-glob '.env*' \
-            ./www /home/sonoprf/www
+            ./dist /home/${OVH_USER}/www
           bye
           EOF
 
-      # (Optionnel) Healthcheck
-      # - name: Healthcheck homepage
-      #   run: |
-      #     STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://www.sonopresta.com/)
-      #     [ "$STATUS" = "200" ] || (echo "Healthcheck failed: $STATUS" && exit 1)
-# Fin du workflow
+      - name: Healthcheck
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://sonopresta.com/)
+          [ "$STATUS" = "200" ] || (echo "Healthcheck failed: $STATUS" && exit 1)
+          curl -I https://sonopresta.com/assets/
