@@ -11,7 +11,7 @@
   <!-- PATCH 1 — réécrit fetch / XHR si l'app appelle le host OVH -->
   <script>
   (function () {
-    const BAD  = "https://sonoprf.cluster100.hosting.ovh.net";
+    const BAD  = "https://sonopresta.com";
     const GOOD = location.origin;
 
     // fetch()
@@ -47,7 +47,7 @@
   <!-- PATCH 2 — réécrit tous les src/href déjà présents et futurs dans le DOM -->
   <script>
   (function () {
-    const BAD  = "https://sonoprf.cluster100.hosting.ovh.net";
+    const BAD  = "https://sonopresta.com";
     const GOOD = location.origin;
 
     function fix(el) {
