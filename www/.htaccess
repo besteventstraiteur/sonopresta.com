@@ -1,10 +1,9 @@
 ########################################
-# OVH / Apache - SPA + assets
+# OVH / Apache config - SPA + assets
 ########################################
 
 Options -Multiviews
 
-# Types MIME explicites
 <IfModule mod_mime.c>
   AddType application/javascript .js
   AddType text/css .css
@@ -15,19 +14,16 @@ Options -Multiviews
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
-  # 1) Court-circuiter toute réécriture pour les assets et fichiers statiques
-  RewriteCond %{REQUEST_URI} ^/assets/ [OR]
-  RewriteCond %{REQUEST_URI} ^/browser- [OR]
-  RewriteCond %{REQUEST_URI} \.(js|css|png|jpg|jpeg|gif|svg|webp|ico|woff|woff2|ttf|map)$ [NC]
+  # Serve existing files and directories directly
   RewriteCond %{REQUEST_FILENAME} -f
   RewriteRule ^ - [L]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
 
-  # 2) Fallback SPA : renvoyer index.html uniquement si ce n’est NI un fichier NI un dossier
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
+  # SPA fallback
   RewriteRule ^ index.html [L]
 </IfModule>
 
 ########################################
-# Fin
+# Fin .htaccess
 ########################################
