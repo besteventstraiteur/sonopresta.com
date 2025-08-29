@@ -4,6 +4,7 @@
 
 Options -Multiviews
 
+# Types MIME explicites
 <IfModule mod_mime.c>
   AddType application/javascript .js
   AddType text/css .css
@@ -11,16 +12,20 @@ Options -Multiviews
   AddType application/json .json
 </IfModule>
 
+# Réécriture
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
-  # Serve existing files and directories directly
+  # 1) Servir les fichiers statiques tels quels
+  RewriteCond %{REQUEST_URI} ^/assets/ [OR]
+  RewriteCond %{REQUEST_URI} ^/browser- [OR]
+  RewriteCond %{REQUEST_URI} \.(js|css|png|jpg|jpeg|gif|svg|webp|ico|woff|woff2|ttf|map)$ [NC]
   RewriteCond %{REQUEST_FILENAME} -f
   RewriteRule ^ - [L]
-  RewriteCond %{REQUEST_FILENAME} -d
-  RewriteRule ^ - [L]
 
-  # SPA fallback
+  # 2) Fallback SPA uniquement si ce n’est pas un fichier/dossier réel
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
   RewriteRule ^ index.html [L]
 </IfModule>
 

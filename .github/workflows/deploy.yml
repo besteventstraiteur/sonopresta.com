@@ -50,3 +50,4 @@ jobs:
       #   run: |
       #     STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://www.sonopresta.com/)
       #     [ "$STATUS" = "200" ] || (echo "Healthcheck failed: $STATUS" && exit 1)
+# Fin du workflow
